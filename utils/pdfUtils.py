@@ -1,16 +1,18 @@
-import tika
 from tika import parser
 import tqdm
 import re
 import os
 
-def explore_dir(path, ext='.pdf'):
+def explore_dir(path, ext='.pdf', max_size=None):
 	"""Takes Path to Directory and Explores pdf or other type of files
 	Input (str): path to a directory
 	Output (list): list of path to discovered files """
     files = []
     for (dirpath, dirnames, filenames) in os.walk(path):
-        filenames = [os.path.join(dirpath, f) for f in filenames if os.path.splitext(f)[-1].lower() == ext]
+        if max_size:
+            filenames = [os.path.join(dirpath, f) for f in filenames if os.path.splitext(f)[-1].lower() == ext and os.path.getsize(os.path.join(dirpath, f)) <= max_size]
+        else:
+            filenames = [os.path.join(dirpath, f) for f in filenames if os.path.splitext(f)[-1].lower() == ext]
         files.extend(filenames)
     return files
 
@@ -36,3 +38,21 @@ def read_pdf(filename):
     content = " ".join([c for c in re.split('\s|:',parsed["content"]) if not isEnglish(c)])
     return parsed["metadata"], content
 
+
+
+def split_by(data, param="sentence"):
+	"""Split String by paragraph or Sentence
+		Input:
+			data (str): textual data to split
+			param (str): [sentence|paragraph]
+		Output (list): list of sentence or paragraph"""
+	if param == "sentence":
+		return [p.strip()+"፡፡" for p in re.split('፡፡|\n+|።', data, flags=re.DOTALL)]               
+	else:
+		return [s.strip() for s in re.split('\n+', data, flags=re.DOTALL)]
+
+
+
+
+
+		
