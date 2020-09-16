@@ -1,4 +1,5 @@
 import unittest
+import json
 import argparse
 from utils.pdfUtils import *
 from DataGenerator import DataSetGenerator
@@ -30,8 +31,8 @@ class TestDataSetGeneratorClass(unittest.TestCase):
 		parser.add_argument("--root_dir", default=None, type=str)
 		parser.add_argument("--output_dir", default='data', type=str)
 		parser.add_argument("--text_split_param", default='sentence', type=str, help="Determines how we split the text [sentence|paragraph]")
-		parser.add_argument("--reader_starting_index", default=10, type=int , help="Determines Where to start Reading PDF chunks")
-		parser.add_argument("--reader_ending_index", default=-10, type=int , help="Determines Where to stop Reading PDF chunks")
+		parser.add_argument("--reader_starting_index", default=1, type=int , help="Determines Where to start Reading PDF chunks")
+		parser.add_argument("--reader_ending_index", default=-1, type=int , help="Determines Where to stop Reading PDF chunks")
 		parser.add_argument("--reader_progress", default='progress.json', type=str)
 		parser.add_argument("--progress_update_interval", default=3, type=int , help="Determines how to load the progress to progress.json")
 		parser.add_argument("--max_pdf_size", default=-1, type=int, help="Maximum size of each PDF file size allowed. (MB)")
@@ -49,11 +50,15 @@ class TestDataSetGeneratorClass(unittest.TestCase):
 		self.generator.pdf_files[self.test_pdf] = self.args.reader_starting_index
 		metadata, content = read_pdf(self.test_pdf)		
 		parsed_data = split_by(content, self.args.text_split_param)	
-		print('-------------data length------------')
-		print(self.args.reader_ending_index % len(parsed_data))
 		self.assertEqual(self.generator.is_readable(self.test_pdf, len(parsed_data)), True, 'Readablity incorrect..')
 
-	# def test_generator_writer(self):
+	def test_progress_writer(self):
+		self.generator.write_progress(self.args.reader_progress, {self.test_pdf:self.args.reader_starting_index})
+		data = {}
+		with open(self.args.reader_progress, 'r') as f:
+			data = json.load(f)
+		self.assertEqual({self.test_pdf:self.args.reader_starting_index}, data)
+
 
 if __name__ == '__main__':
     unittest.main()
