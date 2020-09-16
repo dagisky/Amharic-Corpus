@@ -13,10 +13,11 @@ class DataSetGenerator(object):
 		self.args = args
 		self.pdf_files = dict()
 		self.output_files = list()
-
-		self.load_pdf_files()
-		self.init_outputs()
 		tika.initVM()
+		if args.extract_pdf:
+			self.load_pdf_files()
+			self.init_outputs()
+		
 
 
 	def load_pdf_files(self):
@@ -61,7 +62,7 @@ class DataSetGenerator(object):
 			Input:
 				file (str): path to the read file
 				parsed_lenght (int): length of the parsed data based on sentence or paragraph"""
-		if self.args.reader_starting_index < parsed_length and 	(parsed_length-self.args.reader_starting_index) > abs(self.args.reader_ending_index) and self.pdf_files[file] < self.args.reader_ending_index % parsed_length:
+		if self.args.reader_starting_index < parsed_length and self.pdf_files[file] < self.args.reader_ending_index % parsed_length:
 			return True
 		else:
 			return False
@@ -113,6 +114,10 @@ class DataSetGenerator(object):
 			while self.is_readable(file, len(parsed_data)):
 				if self.pdf_files[file] + self.args.chunk_size < (self.args.reader_ending_index % len(parsed_data)):
 					data = parsed_data[self.pdf_files[file]:self.args.chunk_size]
+					print('--------------writing data--------------')
+					print(file)
+					print(len(data))
+					print(data)
 					self.write_randomized_output(data)
 					self.pdf_files[file] += self.args.chunk_size
 				else:

@@ -17,7 +17,9 @@ superstratum to enable communication between people who spoke a mix of different
 
 
 ### Usage
-
+```
+python main.py --root_dir <Root Dir To Explore> --extract_pdf 
+```
 
 ### Licensing and Acknowledgements
 Credit is due to Udacity Data Scientist NanoDegree Program!
