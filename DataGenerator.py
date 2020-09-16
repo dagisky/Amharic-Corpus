@@ -46,7 +46,8 @@ class DataSetGenerator(object):
 		"""Initialize Output Files"""
 		if os.path.exists(self.args.output_dir): 
 			print('Loading Output files...')
-			self.output_files = explore_dir(self.args.output_dir, ext='.txt', max_size=self.args.max_output_size)
+			self.output_files = explore_dir(os.path(self.args.output_dir), ext='.txt', max_size=self.args.max_output_size)
+			print(self.output_files)
 		else:
 			print('Initializing Output...')
 			try:  
@@ -67,6 +68,22 @@ class DataSetGenerator(object):
 		else:
 			return False
 
+	def get_data_chunk(self, file, parsed_data_size):
+		"""Return Chunk pdf data interval of the data to be randomly written on the output file
+			Input:
+				file (str): to enable  the code to check if the file exists in the initialized list of pdf files
+							 and assert the progress
+				Parsed_data_size (int): size of the parsed data
+			Output:
+				(start_index: end_index)
+		"""
+		assert file in  self.pdf_files, "Chunk data should be in initialized pdf documents"
+		if self.pdf_files[file] + self.args.chunk_size < (self.args.reader_ending_index % parsed_data_size):
+			return (self.pdf_files[file] , self.pdf_files[file]+self.args.chunk_size), self.args.chunk_size
+		else:
+			last_chunk = self.args.reader_ending_index % parsed_data_size
+			return (self.pdf_files[file], self.pdf_files[file]+last_chunk), last_chunk
+
 
 	def write_output(self, file, data):
 		"""Write data to a file
@@ -76,7 +93,7 @@ class DataSetGenerator(object):
 		print('writing to file..'+file)
 		mode = 'w+'
 		if os.path.exists(file):
-			mode = 'a'
+			mode = 'a+'
 		with open(file, mode, encoding='utf-8') as f:
 			for d in data:
 				f.write(d+"\n")
@@ -102,6 +119,11 @@ class DataSetGenerator(object):
 		return is_block_written
 
 
+	def write_progress(self, filename, data):
+		with open(filename, 'w+') as outfile:
+			json.dump(data, outfile)
+		outfile.close()
+
 
 	def generate(self):
 		"""Main Function to Generate Data form PDF files"""
@@ -115,18 +137,11 @@ class DataSetGenerator(object):
 			parsed_data = split_by(content, self.args.text_split_param)
 
 			while self.is_readable(file, len(parsed_data)):
-				if self.pdf_files[file] + self.args.chunk_size < (self.args.reader_ending_index % len(parsed_data)):
-					data = parsed_data[self.pdf_files[file]:self.args.chunk_size]
-					self.write_randomized_output(data)
-					self.pdf_files[file] += self.args.chunk_size
-				else:
-					last_chunk = self.args.reader_ending_index % len(parsed_data)
-					data = parsed_data[self.pdf_files[file]:last_chunk]
-					self.write_randomized_output(data)
-					# del self.pdf_files[file] # += last_chunk [remove item from dictionary]
-			if i % self.args.progress_update_interval:
-				with open(self.args.reader_progress, 'w+') as outfile:
-					json.dump(self.pdf_files, outfile)
-		
+				chunk, chunk_size = self.get_data_chunk(file, len(parsed_data))
+				data = parsed_data[chunk[0]:chunk[1]]
+				self.write_randomized_output(data)
+				self.pdf_files[file] += chunk_size
+			self.write_progress(self.args.reader_progress, self.pdf_files)
+	
 
 
