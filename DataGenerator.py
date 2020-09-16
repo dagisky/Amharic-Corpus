@@ -68,12 +68,16 @@ class DataSetGenerator(object):
 			return False
 
 
-	def write_output(file, data):
+	def write_output(self, file, data):
 		"""Write data to a file
 			Input:
 				file (str): path to output file
 				data (list)"""
-		with open(file, 'a+', encoding='utf-8') as f:
+		print('writing to file..'+file)
+		mode = 'w+'
+		if os.path.exists(file):
+			mode = 'a'
+		with open(file, mode, encoding='utf-8') as f:
 			for d in data:
 				f.write(d+"\n")
 		f.close()
@@ -88,7 +92,7 @@ class DataSetGenerator(object):
 		assert self.output_files != [], "All dataset Files have been completed"
 		file = random.choice(self.output_files)
 		is_block_written = False
-		if not os.path.exists(file) or os.path.getsize(file) < self.max_output_size:
+		if not os.path.exists(file) or os.path.getsize(file) < self.args.max_output_size:
 			self.write_output(file, data)
 			is_block_written = True
 			return is_block_written
@@ -105,7 +109,6 @@ class DataSetGenerator(object):
 		# itterate untill all data has been fully written [input can be ra]
 
 		for i, file  in tqdm(enumerate(list(self.pdf_files.keys()))):
-			# print('... reading {}'.format(file))	
 			metadata, content = read_pdf(file)	
 			if content == None:
 				continue		
@@ -114,10 +117,6 @@ class DataSetGenerator(object):
 			while self.is_readable(file, len(parsed_data)):
 				if self.pdf_files[file] + self.args.chunk_size < (self.args.reader_ending_index % len(parsed_data)):
 					data = parsed_data[self.pdf_files[file]:self.args.chunk_size]
-					print('--------------writing data--------------')
-					print(file)
-					print(len(data))
-					print(data)
 					self.write_randomized_output(data)
 					self.pdf_files[file] += self.args.chunk_size
 				else:
