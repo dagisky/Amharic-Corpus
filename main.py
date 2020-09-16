@@ -1,16 +1,15 @@
 from utils.pdfUtils import *
 import argparse
 from DataGenerator import DataSetGenerator
-# import tika
 
 
 def main(args):
 	if args.extract_pdf:
 		"""Extract PDF from all PDF files under the root Directory"""
-		print("Initializing VM")
-		# tika.initVM()
 		generator = DataSetGenerator(args)
 		generator.generate()
+
+
 
 
 if __name__ == "__main__":
