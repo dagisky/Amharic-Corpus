@@ -90,7 +90,6 @@ class DataSetGenerator(object):
 			Input:
 				file (str): path to output file
 				data (list)"""
-		print('writing to file..'+file)
 		mode = 'w+'
 		if os.path.exists(file):
 			mode = 'a+'
