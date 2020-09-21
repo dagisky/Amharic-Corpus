@@ -2,6 +2,8 @@ from tika import parser
 import tqdm
 import re
 import os
+import shutil
+from shutil import copyfile
 
 def explore_dir(path, ext='.pdf', max_size=None):
 	"""Takes Path to Directory and Explores pdf or other type of files
@@ -58,5 +60,7 @@ def split_by(data, param="sentence"):
 
 
 
-
-		
+def copy_file(filename, output_dir):
+	"""Coppy all amharic files"""
+	# copyfile(filename, output_dir)
+	shutil.copy2(filename, output_dir)	

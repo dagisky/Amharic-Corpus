@@ -21,6 +21,11 @@ In addition use the requirements and install all the required python dependencie
 ```
 python main.py --root_dir Root_Dir_To_Be_Explored --extract_pdf 
 ```
+To copy pdf files
+```
+python main.py --copy_pdf --root_dir Root_Dir_To_Be_Explored --output_dir Directory_to_store
+```
 
 ### Licensing and Acknowledgements
 Credit is due to UESTC, Capital Printing Press
+# visual geeze formating correction

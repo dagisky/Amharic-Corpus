@@ -44,12 +44,13 @@ class DataSetGenerator(object):
 
 	def init_outputs(self):
 		"""Initialize Output Files"""
+		print('Initializing Output...')
 		if os.path.exists(self.args.output_dir): 
-			print('Loading Output files...')
-			self.output_files = explore_dir(os.path(self.args.output_dir), ext='.txt', max_size=self.args.max_output_size)
-			print(self.output_files)
-		else:
-			print('Initializing Output...')
+			# self.output_files = explore_dir(os.path(self.args.output_dir), ext='.txt', max_size=self.args.max_output_size)
+			for i in range(self.args.number_of_output_files):
+					self.output_files.append(os.path.join(self.args.output_dir, str(i)+".txt"))
+			assert self.output_files != [], "Output files not initialized: No output files have been found with "
+		else:			
 			try:  
 				os.mkdir(self.args.output_dir)  
 				for i in range(self.args.number_of_output_files):
@@ -93,7 +94,7 @@ class DataSetGenerator(object):
 		mode = 'w+'
 		if os.path.exists(file):
 			mode = 'a+'
-		with open(file, mode, encoding='utf-8') as f:
+		with open(file, mode, encoding=self.args.output_encoding) as f:
 			for d in data:
 				f.write(d+"\n")
 		f.close()
@@ -128,7 +129,7 @@ class DataSetGenerator(object):
 		"""Main Function to Generate Data form PDF files"""
 		assert self.pdf_files != {}, "All Pdf Files have been explored"
 		# itterate untill all data has been fully written [input can be ra]
-
+		number_of_sentence_generated = 0
 		for i, file  in tqdm(enumerate(list(self.pdf_files.keys()))):
 			metadata, content = read_pdf(file)	
 			if content == None:
@@ -138,9 +139,12 @@ class DataSetGenerator(object):
 			while self.is_readable(file, len(parsed_data)):
 				chunk, chunk_size = self.get_data_chunk(file, len(parsed_data))
 				data = parsed_data[chunk[0]:chunk[1]]
-				self.write_randomized_output(data)
+				written = self.write_randomized_output(data)				
 				self.pdf_files[file] += chunk_size
+				if written:
+					number_of_sentence_generated += chunk_size
 			self.write_progress(self.args.reader_progress, self.pdf_files)
+		print("{} sentences have been written".format(number_of_sentence_generated))
 	
 
 
