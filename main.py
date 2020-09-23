@@ -17,12 +17,13 @@ def main(args):
 		all_files = explore_dir(args.root_dir)
 		for file in tqdm(all_files):
 			meta, content = read_pdf(file)
-			if content != None or content != []:
-				if os.path.exists(args.output_dir): 
-					copy_file(file, args.output_dir)
-				else:
-					os.mkdir(args.output_dir)
-					copy_file(file, args.output_dir)
+			if content != None:
+				if len(content) >= 1000:
+					if os.path.exists(args.output_dir): 
+						copy_file(file, args.output_dir)
+					else:
+						os.mkdir(args.output_dir)
+						copy_file(file, args.output_dir)
 				
 
 
